@@ -177,16 +177,53 @@ if (td->td_stripsperimage == 0) {
 - файл, содержащий подготовленный с помощью `git format-patch` патч, испраляющий уязвимость
 
 ### Настройка окружения
-Для запуска Svace в контейнере можно воспользоваться подготовленным контейнерфайлом:
+#### Установка и настройка Svace
+Скачаем и распакуем архив со статическим анализатором Svace
 ```shell
-podman build --tag svace_pod -f container/Containerfile_svace
+curl -LJ -o svace-3.4.240902-x64-linux.tar.bz2 'https://nextcloud.ispras.ru/index.php/s/bYTpTyn2i9L8PGZ/download?path=%2FSvace&files=svace-3.4.240902-x64-linux.tar.bz2'
+tar -xjvf svace-3.4.240902-x64-linux.tar.bz2
+```
+Создадим симлинк в PATH, чтобы появилась возможность запускать svace без указания пути
+```shell
+ln -s ./svace-3.4.240902-x64-linux/bin/svace /usr/local/bin/svace
 ```
 
-Пример запуска контейнера (возможно вы захотите также создать общие тома):
+#### Установка и настройка Svacer
+Установим сервер для просмотра результатов разметки Svacer из предоставляемого RPM-пакета
 ```shell
-podman run -ti --name svace_cont --network=host svace_pod:latest
+curl -LJ -o svacer-9.0-2.x86_64.rpm 'https://nextcloud.ispras.ru/index.php/s/bYTpTyn2i9L8PGZ/download?path=%2FSvace%2FSvacer&files=svacer-9.0-2.x86_64.rpm'
+sudo apt-get install ./svacer-9.0-2.x86_64.rpm
 ```
+Устанавливаем postgresql с необходимыми расширениями:
+```shell
+sudo apt-get install postgresql16-server postgresql16-contrib
+```
+Инициируем базу данных postgresql и запускаем сервис (от имени root)
+```shell
+/etc/init.d/postgresql initdb
+systemctl start postgresql
+```
+Запускаем утилитку psql под именем пользователя postgres:
+```shell
+psql -U postgres
+```
+Внутри psql создаем БД для работы svacer:
+```shell
+ postgres=# create database svace;
+ postgres=# create user svace with encrypted password 'svace';
+ postgres=# grant all privileges on database svace to svace;
+ postgres=# alter user svace superuser;
+ postgres=# CREATE EXTENSION IF NOT EXISTS btree_gin;
+```
+Для выхода используем Ctrl+D
 
+Запускаем Svacer, например, на порту 8081:
+```
+svacer-server run --port 8081
+```
+После этого оставляем запущенным процесс сервера, дальнейшую работу проводим в другом окне
+
+#### Установка GPAC
 Клонируем репозиторий GPAC
 ```shell
 git clone https://github.com/gpac/gpac
@@ -221,11 +258,13 @@ svace server single-start
 ```
 После чего по адресу http://127.0.0.1:8060 можно будет посмотреть результаты работы анализатора
 
-Для более удобной работы используем утилиту Svacer
+Для более удобной работы используем утилиту Svacer, для выполнения команды upload требуется ранее запущенный сервер Svacer
 ```shell
 svacer import
-svacer upload
+svacer upload --port 8081
 ```
+После чего по адресу  http://127.0.0.1:8081 можно будет подключиться к Svacer с логином и паролем admin:admin
+
 Самостоятельно с помощью ресурсов с данными об уязвимости CVE-2021-41459 найдите детектор, сработавший на рассматриваемую ошибку.
 
 Для этой уязвимости также есть PoC-файл, проверьте с его помощью существование уязвимости:
@@ -296,6 +335,10 @@ svace analyze
 - Попробуете обнаружить эту уязвимость с помощью других средств статического анализа. Предположите, почему получается/не получается.
 
 ## Changelog
+- 30.09.2024 2.2
+	- Убран контейнерфайл с Svace
+	- Описана установка и настройка Svace и Svacer
+
 - 23.09.2024 2.1
 	- Добавлен контейнерфайл с Svace
 
