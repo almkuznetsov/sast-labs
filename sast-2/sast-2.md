@@ -17,10 +17,9 @@ apt-get install make libSM-devel libXi-devel libXmu-devel libfreeglut-devel libj
 apt-get install clang18.1-analyzer gcc-c++ llvm18.1
 ```
 Склонируем себе репозиторий с проектом libtiff и перейдем в его директорию
-```
-cd .. # возвращаемся в директорию sast-labs
-git clone https://gitlab.com/libtiff/libtiff
-cd libtiff
+```shell
+git clone (your assignment repo link)
+cd (your assignemnt repo)
 ```
 
 ### Статический анализ
@@ -45,9 +44,9 @@ scan-build: Run 'scan-view /tmp/.private/[..]' to examine bug reports.
 Нас будет интересовать первое срабатывание детектора `Division by zero` в файле `libtiff/tif_write.c:119`.
 Как видим, `td->td_stripsperimage` может быть равным нулю, в результате чего может возникнуть деление на ноль.
 
-Для этой уязвимости у нас есть proof of conecpt (PoC) файл - это файл, позволяющий продемонстрировать существование уязвимости. Давайте остановим работу утилиты scan-view (Ctrl+C) и попробуем воспроизвести эксплуатацию уязвимости, для этого подадим на вход собранной нами утилите tiffdither специально сформированный tiff файл, который приведет к рассматриваемому нами делению на ноль
+Для этой уязвимости у нас есть proof of conecpt (PoC) файл - это файл, позволяющий продемонстрировать существование уязвимости. Давайте остановим работу утилиты scan-view (Ctrl+C) и попробуем воспроизвести эксплуатацию уязвимости, для этого подадим на вход собранной нами утилите tiffdither специально сформированный tiff файл, который приведет к рассматриваемому нами делению на ноль. Предварительно любым удобным способом склонируйте PoC файл из репозитория с заданиями.
 ```shell
-./tools/tiffdither ../15_tiffdither.tiff out.tiff
+./tools/tiffdither <path/to/poc/15_tiffdither.tiff> out.tiff
 ```
 Мы должны увидеть сообщение вида `floating point exception`, свидетельствующего о том, что выполнение программы было прервано указанным исключением.
 
