@@ -14,7 +14,7 @@ apt-get install make libSM-devel libXi-devel libXmu-devel libfreeglut-devel libj
 ```
  Также установим LLVM и сам clang static analyzer
 ```shell
-apt-get install clang18.1-analyzer gcc-c++ llvm18.1
+apt-get install clang19.1-analyzer gcc-c++ llvm19.1
 ```
 Склонируем себе репозиторий с проектом libtiff и перейдем в его директорию
 ```shell
