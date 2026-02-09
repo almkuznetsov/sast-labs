@@ -79,8 +79,8 @@ CodeChecker store --name pugixml --url localhost:8001/Default ./cc_out
 Выполните аналогичный анализ проекта https://github.com/anse1/sqlsmith, используя анализаторы clangsa, clang-tidy, cppcheck
 
 Загрузите результат на веб-сервер, выберите и разметьте с комментарием в web-интерфейсе CodeChecker одно из срабатываний детектора:
-- Вариант 1. bugprone-inc-dec-in-conditions
-- Вариант 2. bugprone-signed-char-misuse
+- Вариант 1. cppcheck-nullPointerRedundantCheck
+- Вариант 2. cppcheck-assertWithSideEffect
 
 ### Итог 5 части
 В ходе 5 части мы познакомились с CodeChecker, compile_commands.json и возможностями оркестрации нескольких статических анализаторов, а также провели разметку нескольких их сработок.
